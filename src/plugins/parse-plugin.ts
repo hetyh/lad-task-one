@@ -74,7 +74,6 @@ async function sitesParse(request: Hapi.Request, h: Hapi.ResponseToolkit) {
             }
             // Slices it in a new string
             const bodyText = fetchHtml.slice(bodyOpenIndex, bodyCloseIndex);
-            console.log(bodyText);
             // Parses tag <body>
             const body = parseDocument(bodyText);
             // Extracts an array of words from it
