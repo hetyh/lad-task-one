@@ -16,7 +16,7 @@ async function pdfCreate(sitesWordsArray:
         doc.addFont('JetBrainsMono-Regular.ttf', 'JetBrainsMono-Regular', 'normal');
         doc.setFont('JetBrainsMono-Regular');
 
-        doc.text(`Результат выполнения`, 10, 10);
+        doc.text(`Results`, 10, 10);
         doc.setFontSize(13)
         doc.text(date.toLocaleString(), 10, 20);
 
@@ -30,10 +30,10 @@ async function pdfCreate(sitesWordsArray:
                 siteWordsTop.wordsTop[2],
             ]);
         }
-        console.log(sitesRowArray);
+
         autoTable(doc, {
             head: [
-                ['Сайты', '1-е слово', '2-е слово', '3-е слово']
+                ['URL', 'First word', 'Second word', 'Third word']
             ],
             body: sitesRowArray,
             theme: 'grid',
