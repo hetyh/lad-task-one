@@ -1,6 +1,6 @@
 import * as Hapi from '@hapi/hapi';
 import * as dotenv from 'dotenv';
-import parsePlugin from './plugins/parse.js';
+import parsePlugin from './plugins/parse-plugin.js';
 import { parse } from 'qs';
 
 dotenv.config()
