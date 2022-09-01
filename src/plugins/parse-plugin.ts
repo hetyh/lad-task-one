@@ -48,15 +48,24 @@ async function sitesParse(request: Hapi.Request, h: Hapi.ResponseToolkit) {
             }[] = [];
         for (let site of sites) {
             site = new URL(site);
+            // Check №1
             // If DNS resolve failed, discards site and moves to next one
             if (! await dnsResolve(site.hostname)) {
                 sitesWordsArray.push({
                     siteName: site.toString(),
-                    wordsTop: ['Site doesn\'t exist'],
+                    wordsTop: ['Site does not exist','-','-'],
                 });
                 continue;
             }
-            
+            // Check №2
+            // If protocol is not HTTP(s), discards site and moves to next one
+            if (! site.protocol.match(/https?:/)) {
+                sitesWordsArray.push({
+                    siteName: site.toString(),
+                    wordsTop: ['Protocol is not supported','-','-'],
+                });
+                continue;
+            }
             const fetchResponse = await fetch(site.origin + site.pathname);
             const fetchHtml = await fetchResponse.text();
 
@@ -68,7 +77,7 @@ async function sitesParse(request: Hapi.Request, h: Hapi.ResponseToolkit) {
                 console.error(`${site}: tag <body> is missing or incomplete`);
                 sitesWordsArray.push({
                     siteName: site.toString(),
-                    wordsTop: ['Site doesn\'t exist'],
+                    wordsTop: ['Site\'s structure is broken','-','-'],
                 });
                 continue;
             }
