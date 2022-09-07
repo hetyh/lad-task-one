@@ -1,5 +1,5 @@
 import { Server, Request, ResponseToolkit } from '@hapi/hapi';
-import { badRequest, Boom, expectationFailed, isBoom } from '@hapi/boom';
+import { badGateway, badRequest, Boom, expectationFailed, isBoom } from '@hapi/boom';
 import * as Joi from 'joi';
 import { parseDocument } from 'htmlparser2';
 import { innerText } from 'domutils';
@@ -39,7 +39,7 @@ async function sitesParse(request: Request, h: ResponseToolkit) {
       return fetchText;
     } catch (error) {
       console.error(error);
-      return expectationFailed(`Site ${siteURL.toString()} is not responding properly`);
+      return badGateway(`Site ${siteURL.toString()} is not responding properly`);
     }
   }
 
