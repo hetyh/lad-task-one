@@ -1,8 +1,8 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 
-const font = fs.readFileSync('fonts/JetBrainsMono-Regular.ttf', 'base64')
+const font = readFileSync('fonts/JetBrainsMono-Regular.ttf', 'base64')
 
 async function pdfCreate(
   sitesWordsArray: {

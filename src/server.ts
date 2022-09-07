@@ -1,9 +1,9 @@
 import * as Hapi from '@hapi/hapi';
-import * as dotenv from 'dotenv';
+import { config } from 'dotenv';
 import parsePlugin from './plugins/parse-plugin.js';
 import { parse } from 'qs';
 
-dotenv.config();
+config();
 
 const server: Hapi.Server = Hapi.server({
   port: process.env.PORT || 3000,

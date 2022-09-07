@@ -1,15 +1,14 @@
-import * as Hapi from '@hapi/hapi';
+import { Server, Request, ResponseToolkit } from '@hapi/hapi';
 import { badRequest, Boom, expectationFailed, isBoom } from '@hapi/boom';
 import * as Joi from 'joi';
 import { parseDocument } from 'htmlparser2';
 import { innerText } from 'domutils';
 import { uniq, words, lowerCase } from 'lodash';
 import pdfCreate from '../pdf-create.js';
-import { resolve } from 'dns/promises';
 
 const parsePlugin = {
   name: 'app/parse',
-  register: async (server: Hapi.Server) => {
+  register: async (server: Server) => {
     server.route({
       method: 'GET',
       path: '/api/parse',
@@ -25,7 +24,7 @@ const parsePlugin = {
   },
 };
 
-async function sitesParse(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+async function sitesParse(request: Request, h: ResponseToolkit) {
   // Fetches the site and returns response in text form.
   // Returns an Boom object if fetch is failed or if URL hasn't specified HTTP(S) protocol.
   async function siteFetch(siteURL: URL): Promise<string | Boom<any>> {
