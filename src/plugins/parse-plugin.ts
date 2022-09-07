@@ -1,4 +1,5 @@
 import * as Hapi from '@hapi/hapi';
+import { badRequest, Boom, expectationFailed, isBoom } from '@hapi/boom';
 import * as Joi from 'joi';
 import { parseDocument } from 'htmlparser2';
 import { innerText } from 'domutils';
@@ -24,17 +25,25 @@ const parsePlugin = {
   },
 };
 
-async function dnsResolve(site: string): Promise<boolean> {
-  try {
-    const resolveResult = await resolve(site);
-    return !!resolveResult;
-  } catch (error) {
-    console.error(error);
-    return false;
-  }
-}
-
 async function sitesParse(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+  // Fetches the site and returns response in text form.
+  // Returns an Boom object if fetch is failed or if URL hasn't specified HTTP(S) protocol.
+  async function siteFetch(siteURL: URL): Promise<string | Boom<any>> {
+    // If protocol is not HTTP(s), returns an Boom object
+    if (!siteURL.protocol.match(/https?:/)) {
+      return badRequest(`Site ${siteURL.toString()} has an invalid protocol`);
+    }
+
+    try {
+      const fetchResponse = await fetch(siteURL.origin + siteURL.pathname);
+      const fetchText = await fetchResponse.text();
+      return fetchText;
+    } catch (error) {
+      console.error(error);
+      return expectationFailed(`Site ${siteURL.toString()} is not responding properly`);
+    }
+  }
+
   try {
     const sites: Array<URL> = request.query.sites;
     let sitesWordsArray: {
@@ -43,30 +52,25 @@ async function sitesParse(request: Hapi.Request, h: Hapi.ResponseToolkit) {
     }[] = [];
     for (let site of sites) {
       site = new URL(site);
-      // Check №1
-      // If DNS resolve failed, discards site and moves to next one
-      if (!(await dnsResolve(site.hostname))) {
-        sitesWordsArray.push({
-          siteName: site.toString(),
-          wordsTop: ['Site does not exist', '-', '-'],
-        });
-        continue;
+
+      const fetchResponse = await siteFetch(site);
+      if (isBoom(fetchResponse)) {
+        return h
+          .response(
+            JSON.parse(
+              `{
+                "error":"${fetchResponse.output.payload.error}",
+                "message":"${fetchResponse.message}",
+                "statusCode":"${fetchResponse.output.statusCode}"
+              }`,
+            ),
+          )
+          .code(fetchResponse.output.statusCode);
       }
-      // Check №2
-      // If protocol is not HTTP(s), discards site and moves to next one
-      if (!site.protocol.match(/https?:/)) {
-        sitesWordsArray.push({
-          siteName: site.toString(),
-          wordsTop: ['Protocol is not supported', '-', '-'],
-        });
-        continue;
-      }
-      const fetchResponse = await fetch(site.origin + site.pathname);
-      const fetchHtml = await fetchResponse.text();
 
       // Finds tag <body> in fetched HTML
-      const bodyOpenIndex = fetchHtml.indexOf('<body');
-      const bodyCloseIndex = fetchHtml.lastIndexOf('body>') + 5;
+      const bodyOpenIndex = fetchResponse.indexOf('<body');
+      const bodyCloseIndex = fetchResponse.lastIndexOf('body>') + 5;
 
       // If not present, logs an error, discards site and moves to next one
       if (bodyOpenIndex === -1 || bodyCloseIndex === -1) {
@@ -78,8 +82,7 @@ async function sitesParse(request: Hapi.Request, h: Hapi.ResponseToolkit) {
         continue;
       }
       // Slices it in a new string
-      const bodyText = fetchHtml.slice(bodyOpenIndex, bodyCloseIndex);
-      console.log(bodyText);
+      const bodyText = fetchResponse.slice(bodyOpenIndex, bodyCloseIndex);
       // Parses tag <body>
       const body = parseDocument(bodyText);
       // Extracts an array of words from it
