@@ -27,11 +27,7 @@ const parsePlugin = {
 async function dnsResolve(site: string): Promise<boolean> {
   try {
     const resolveResult = await resolve(site);
-    if (resolveResult) {
-      return true;
-    } else {
-      return false;
-    }
+    return !!resolveResult;
   } catch (error) {
     console.error(error);
     return false;
@@ -71,6 +67,7 @@ async function sitesParse(request: Hapi.Request, h: Hapi.ResponseToolkit) {
       // Finds tag <body> in fetched HTML
       const bodyOpenIndex = fetchHtml.indexOf('<body');
       const bodyCloseIndex = fetchHtml.lastIndexOf('body>') + 5;
+
       // If not present, logs an error, discards site and moves to next one
       if (bodyOpenIndex === -1 || bodyCloseIndex === -1) {
         console.error(`${site}: tag <body> is missing or incomplete`);
@@ -82,6 +79,7 @@ async function sitesParse(request: Hapi.Request, h: Hapi.ResponseToolkit) {
       }
       // Slices it in a new string
       const bodyText = fetchHtml.slice(bodyOpenIndex, bodyCloseIndex);
+      console.log(bodyText);
       // Parses tag <body>
       const body = parseDocument(bodyText);
       // Extracts an array of words from it
