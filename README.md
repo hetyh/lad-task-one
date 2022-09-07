@@ -16,7 +16,9 @@
 >
 > Разработка | Коллеги | тестирование
 
-## Пример выполнения
+## Примеры выполнения
+
+### Пример 1
 
 Запрос:
 
@@ -25,6 +27,30 @@
 Результат:
 
 ![Query response with the PDF file](img/query1.png)
+
+### Пример 2
+
+`GET http://localhost:3000/api/parse?sites[]=http://does.not/exist`
+
+Результат:
+
+```
+HTTP/1.1 502 Bad Gateway
+Connection: keep-alive
+Date: Wed, 07 Sep 2022 19:39:49 GMT
+Keep-Alive: timeout=5
+cache-control: no-cache
+content-length: 108
+content-type: application/json; charset=utf-8
+```
+
+```json
+{
+  "error": "Bad Gateway",
+  "message": "Site http://does.not/exist is not responding properly",
+  "statusCode": "502"
+}
+```
 
 ## Описание API
 
