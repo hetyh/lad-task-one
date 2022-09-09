@@ -74,3 +74,8 @@ content-type: application/json; charset=utf-8
 
 - [nodemon](https://github.com/remy/nodemon) - автоматический перезапуск сервера при обновлении исходников
 - [typescript](https://github.com/Microsoft/TypeScript) - статическая типизация и инкрементальная компиляция при обновлении исходников
+
+## Переменные среды
+
+- HOST - адрес HTTP сервера (по умолчанию 0.0.0.0)
+- PORT - порт HTTP сервера (по умолчанию 3000)
